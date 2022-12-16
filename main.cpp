@@ -25,40 +25,40 @@ int main(){
 
     std::cout<<heap.get_min().value()<<std::endl;
 
-    int min_value = heap.extract_min().value();
+    // int min_value = heap.extract_min().value();
 
-    std::cout<<min_value<<std::endl;
-
-
-
-    // Dijkstra's Algorithm
-
-    edges_t edges1 = {{0, 1, 3.0f},
-                    {0, 2, 1.0f},
-                    {1, 2, 7.0f},
-                    {1, 3, 5.0f},
-                    {1, 4, 1.0f},
-                    {2, 3, 2.0f},
-                    {3, 4, 7.0f}};
+    // std::cout<<min_value<<std::endl;
 
 
-    Graph g1(5, edges1, GraphType::UNDIRECTED);
 
-    std::unordered_map<vertex_t, std::optional<std::tuple<vertex_t, edge_weight_t>>> result
-            = dijkstra_shortest_path(g1, 2);
+    // // Dijkstra's Algorithm
 
-    // Previous vertex of src are not checked.
-    std::vector<vertex_t> previous = {2, 0, (vertex_t)-1, 2, 1}; 
-    std::vector<edge_weight_t> dist = {1.0f, 4.0f, 0.0f, 2.0f, 5.0f};
+    // edges_t edges1 = {{0, 1, 3.0f},
+    //                 {0, 2, 1.0f},
+    //                 {1, 2, 7.0f},
+    //                 {1, 3, 5.0f},
+    //                 {1, 4, 1.0f},
+    //                 {2, 3, 2.0f},
+    //                 {3, 4, 7.0f}};
 
 
-    // The printed result should be same as above.
+    // Graph g1(5, edges1, GraphType::UNDIRECTED);
 
-    for(size_t i = 0 ; i < 5 && i!=2 ; ++i) {
-        std::cout<<"[vertex i] ";
-        std::cout<<"previous: "<<std::get<0>(result[i].value())<<", ";
-        std::cout<<"distance: "<<std::get<1>(result[i].value())<<std::endl;
-    }
+    // std::unordered_map<vertex_t, std::optional<std::tuple<vertex_t, edge_weight_t>>> result
+    //         = dijkstra_shortest_path(g1, 2);
+
+    // // Previous vertex of src are not checked.
+    // std::vector<vertex_t> previous = {2, 0, (vertex_t)-1, 2, 1}; 
+    // std::vector<edge_weight_t> dist = {1.0f, 4.0f, 0.0f, 2.0f, 5.0f};
+
+
+    // // The printed result should be same as above.
+
+    // for(size_t i = 0 ; i < 5 && i!=2 ; ++i) {
+    //     std::cout<<"[vertex i] ";
+    //     std::cout<<"previous: "<<std::get<0>(result[i].value())<<", ";
+    //     std::cout<<"distance: "<<std::get<1>(result[i].value())<<std::endl;
+    // }
 
     return 0;
     

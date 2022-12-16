@@ -89,6 +89,18 @@ template <typename T>
 FibonacciHeap<T>::~FibonacciHeap() {
 	// TODO
 	// NOTE: Be aware of memory leak or memory error.
+
+    std::weak_ptr<FibonacciNode<T>> temp;
+    temp = min_node;
+
+    std::shared_ptr<FibonacciNode<T>> temp_lock;
+
+    while ((temp_lock = temp.lock())->right != nullptr)
+    {
+        a->right = nullptr;
+        min
+    }
+    
 }
 
 template <typename T>
@@ -109,6 +121,24 @@ template <typename T>
 void FibonacciHeap<T>::insert(std::shared_ptr<FibonacciNode<T>>& node) {
 	// TODO
 
+    if (is_empty()) {
+        node->right = node;
+        node->left = node;
+        min_node = node;
+        std::cout << "initial inserted!, key : " << node->key << std::endl;
+    } else {
+        if (std::shared_ptr<FibonacciNode<T>> min_node_left = (min_node->left).lock())
+            min_node_left->right = node;
+        node->right = min_node;
+        node->left = min_node->left;
+        min_node->left = node;
+
+        if (node->key < min_node->key)
+            min_node = node;
+        
+        std::cout << "inserted!, key : " << node->key << std::endl;
+    }
+    size_++;
 }
 
 template <typename T>
@@ -133,7 +163,7 @@ void FibonacciHeap<T>::remove(std::shared_ptr<FibonacciNode<T>>& x) {
 template <typename T>
 void FibonacciHeap<T>::consolidate() {
 	float phi = (1 + sqrt(5)) / 2.0;
-	int len = int(log(size_) / log(phi)) + 10;
+	int len = int(log(size_) / log(phi)) + 1;
 	// TODO
 
 	std::vector<std::shared_ptr<FibonacciNode<T>>> A(len, nullptr);
