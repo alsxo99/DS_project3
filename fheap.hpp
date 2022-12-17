@@ -76,7 +76,7 @@ class FibonacciHeap : public PriorityQueue<T> {
     private:
 
         std::shared_ptr<FibonacciNode<T>> min_node;
-        size_t size_;
+        size_t size_; // heap의 개수인듯?
 
         void consolidate();
         void merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_ptr<FibonacciNode<T>>& y);
@@ -90,16 +90,15 @@ FibonacciHeap<T>::~FibonacciHeap() {
 	// TODO
 	// NOTE: Be aware of memory leak or memory error.
 
-    std::weak_ptr<FibonacciNode<T>> temp;
-    temp = min_node;
+    // std::weak_ptr<FibonacciNode<T>> current;
+    // current = min_node;
 
-    std::shared_ptr<FibonacciNode<T>> temp_lock;
-
-    while ((temp_lock = temp.lock())->right != nullptr)
-    {
-        a->right = nullptr;
-        min
-    }
+    // while (current.lock()->right != nullptr)
+    // {
+    //     std::cout << current.lock()->right->key << std::endl;
+    //     (current.lock()->right).reset();
+    //     current = current.lock()->right;
+    // }
     
 }
 
@@ -127,8 +126,7 @@ void FibonacciHeap<T>::insert(std::shared_ptr<FibonacciNode<T>>& node) {
         min_node = node;
         std::cout << "initial inserted!, key : " << node->key << std::endl;
     } else {
-        if (std::shared_ptr<FibonacciNode<T>> min_node_left = (min_node->left).lock())
-            min_node_left->right = node;
+        (min_node->left).lock()->right = node;
         node->right = min_node;
         node->left = min_node->left;
         min_node->left = node;
@@ -137,6 +135,7 @@ void FibonacciHeap<T>::insert(std::shared_ptr<FibonacciNode<T>>& node) {
             min_node = node;
         
         std::cout << "inserted!, key : " << node->key << std::endl;
+        // std::cout << "left : " << (node->left).lock()->key << "    right : " << node->right->key << std::endl;
     }
     size_++;
 }
@@ -144,8 +143,37 @@ void FibonacciHeap<T>::insert(std::shared_ptr<FibonacciNode<T>>& node) {
 template <typename T>
 std::optional<T> FibonacciHeap<T>::extract_min() {
 	// TODO
+    if(is_empty)
+        return std::nullopt;
 
-	return std::nullopt;
+    T min_key = min_node->key;
+
+    // min_node와 child간의 관계 끊기
+    std::shared_ptr<FibonacciNode<T>> child = min_node->child;
+    min_node->child = nullptr;
+    for (int i = 0; i < int(min_node->degree); i++)
+    {
+        child->parent = nullptr;
+        child = child->right;
+    }
+    
+    // root list에 min_node 대신 그의 child로 수정해준다.
+    (min_node->left).lock()->right = child;
+    (child->left).lock()->right = min_node->right;
+    (min_node->right)->left = child->left;
+    child->left = min_node->left;
+
+    // size도 일시적으로 수정. min_node가 빠지고 child들이 root list로 들어왔으니까
+    size_ += min_node->degree - 1;
+
+    // min_node update, 기존 min_node의 left, right가 사라지는건가? (reference num 줄어드나?)
+    // 아니라면 right에 nullptr넣고 left를 주면 되겠다.
+    min_node = min_node->right;
+
+    consolidate();
+
+    // size_--; // size가 heap 개수인지, node 개수인지 확인해야함.
+    return min_key;
 }
 
 template <typename T>
@@ -167,13 +195,46 @@ void FibonacciHeap<T>::consolidate() {
 	// TODO
 
 	std::vector<std::shared_ptr<FibonacciNode<T>>> A(len, nullptr);
+    for (int i = 0; i < int(size_); i++)
+    {
+        int index = min_node->degree;
+        if (A[index] == nullptr)
+            A[index] = min_node;
+        else
+            merge(A[index], min_node);
 
+        min_node = min_node->right;
+    }
+    
 }
 
 template <typename T>
 void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_ptr<FibonacciNode<T>>& y) {
 	// TODO
 
+    if (x->key < y->key) {
+        // y를 root list에서 제거하고, y의 parent를 x로 해준다. x의 degree는 1 증가.
+        (y->left).lock()->right = y->right;
+        (y->right)->left = y->left;
+        y->parent = x;
+        x->degree += 1;
+
+        // x의 child와 y를 doubly linked 관계로 만들어준다.
+        (x->child->left).lock()->right = y;
+        y->right = x->child;
+        y->left = x->child->left;
+        x->child->left = y;
+    } else {
+        (x->left).lock()->right = x->right;
+        (x->right)->left = x->left;
+        x->parent = y;
+        y->degree += 1;
+
+        (y->child->left).lock()->right = x;
+        x->right = y->child;
+        x->left = y->child->left;
+        y->child->left = x;
+    }
 }
 
 template <typename T>
