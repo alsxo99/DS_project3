@@ -76,7 +76,7 @@ class FibonacciHeap : public PriorityQueue<T> {
     private:
 
         std::shared_ptr<FibonacciNode<T>> min_node;
-        size_t size_; // heap의 개수인듯?
+        size_t size_;
 
         void consolidate();
         void merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_ptr<FibonacciNode<T>>& y);
@@ -99,6 +99,13 @@ FibonacciHeap<T>::~FibonacciHeap() {
     //     (current.lock()->right).reset();
     //     current = current.lock()->right;
     // }
+
+    // 연습용
+    // std::shared_ptr<FibonacciNode<T>> p1 = min_node;
+    // std::shared_ptr<FibonacciNode<T>> p2 = min_node;
+
+    // std::cout << (p1 == p2) << std::endl;
+    // std::cout << (p1.get() == p2.get()) << std::endl;
     
 }
 
@@ -143,19 +150,19 @@ void FibonacciHeap<T>::insert(std::shared_ptr<FibonacciNode<T>>& node) {
 template <typename T>
 std::optional<T> FibonacciHeap<T>::extract_min() {
 	// TODO
-    if(is_empty)
+    if(is_empty())
         return std::nullopt;
 
     T min_key = min_node->key;
 
     // min_node와 child간의 관계 끊기
     std::shared_ptr<FibonacciNode<T>> child = min_node->child;
-    min_node->child = nullptr;
-    for (int i = 0; i < int(min_node->degree); i++)
-    {
-        child->parent = nullptr;
-        child = child->right;
-    }
+    min_node->child = nullptr; // 필요 없나?
+    // for (int i = 0; i < int(min_node->degree); i++)
+    // {
+    //     child->parent = nullptr;
+    //     child = child->right;
+    // }
     
     // root list에 min_node 대신 그의 child로 수정해준다.
     (min_node->left).lock()->right = child;
@@ -163,23 +170,28 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
     (min_node->right)->left = child->left;
     child->left = min_node->left;
 
-    // size도 일시적으로 수정. min_node가 빠지고 child들이 root list로 들어왔으니까
-    size_ += min_node->degree - 1;
-
     // min_node update, 기존 min_node의 left, right가 사라지는건가? (reference num 줄어드나?)
+    // reference num은 당연히 줄어들텐데, 객체가 삭제되는건지 모르겠다.
     // 아니라면 right에 nullptr넣고 left를 주면 되겠다.
     min_node = min_node->right;
 
     consolidate();
 
-    // size_--; // size가 heap 개수인지, node 개수인지 확인해야함.
+    size_--; // node의 개수가 1 줄었으므로, (여기서 줄이는게 맞나 ? ) consolidate 전에 해야 할지도
     return min_key;
 }
 
 template <typename T>
 void FibonacciHeap<T>::decrease_key(std::shared_ptr<FibonacciNode<T>>& x, T new_key) {
 	// TODO
-
+    x->key = new_key;
+    // x가 root node인 경우, return.
+    if ((x->parent).lock() == nullptr) return;
+    // decrease_key가 min heap을 violate하지 않은 경우, key만 바꿔주고 return.
+    if ((x->parent).lock()->key <= new_key)
+        return;
+    // violate 한 경우, 
+    else cut(x);
 }
 
 template <typename T>
@@ -195,16 +207,25 @@ void FibonacciHeap<T>::consolidate() {
 	// TODO
 
 	std::vector<std::shared_ptr<FibonacciNode<T>>> A(len, nullptr);
-    for (int i = 0; i < int(size_); i++)
-    {
-        int index = min_node->degree;
-        if (A[index] == nullptr)
-            A[index] = min_node;
-        else
-            merge(A[index], min_node);
 
-        min_node = min_node->right;
-    }
+    std::shared_ptr<FibonacciNode<T>> start = min_node;
+    std::shared_ptr<FibonacciNode<T>> current = min_node;
+
+    int index;
+    do {
+        index = current->degree;
+        if (A[index] == nullptr) {
+            A[index] = current;
+            current = current->right;
+        } else {
+            if (A[index] != current) {
+                merge(A[index], current);
+                if (current->key > A[index]->key)
+                    current = A[index];
+                A[index] = nullptr;
+            }
+        }
+    } while(start != current);
     
 }
 
@@ -220,27 +241,46 @@ void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_p
         x->degree += 1;
 
         // x의 child와 y를 doubly linked 관계로 만들어준다.
-        (x->child->left).lock()->right = y;
-        y->right = x->child;
-        y->left = x->child->left;
-        x->child->left = y;
+        if (x->degree) {
+            (x->child->left).lock()->right = y;
+            y->right = x->child;
+            y->left = x->child->left;
+            x->child->left = y;
+        } else
+            x->child = y;
+        // y가 min_node였을 경우, min_node를 x로 수정한다.
+        if (y.get() == min_node.get())
+            min_node = x;
     } else {
         (x->left).lock()->right = x->right;
         (x->right)->left = x->left;
         x->parent = y;
         y->degree += 1;
 
-        (y->child->left).lock()->right = x;
-        x->right = y->child;
-        x->left = y->child->left;
-        y->child->left = x;
+        if (y->degree) {
+            (y->child->left).lock()->right = x;
+            x->right = y->child;
+            x->left = y->child->left;
+            y->child->left = x;
+        } else
+            y->child = x;
+
+        if (x.get() == min_node.get())
+            min_node = y;
     }
 }
 
 template <typename T>
 void FibonacciHeap<T>::cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
+    // x가 parent의 child였을 경우,
+    if ((x->parent).lock()->child == x)
+        (x->parent).lock()->child = x->child;
 
+    // x의 child가 존재할 경우, x의 parent와 child간의 관계를 만들어 준다.
+    if (x->degree) {
+        // 기존의 x의 child를 x의 parend의 child
+    }
 }
 
 template <typename T>
