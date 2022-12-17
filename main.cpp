@@ -25,9 +25,9 @@ int main(){
 
     std::cout<<heap.get_min().value()<<std::endl;
 
-    // int min_value = heap.extract_min().value();
+    int min_value = heap.extract_min().value();
 
-    // std::cout<<min_value<<std::endl;
+    std::cout<<min_value<<std::endl;
 
 
 
