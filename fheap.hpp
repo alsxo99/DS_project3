@@ -193,6 +193,8 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
         current = current->right;
     } while (start != current);
 
+    std::cout << min_node->key << std::endl;
+
     consolidate();
 
     size_--; // node의 개수가 1 줄었으므로, (여기서 줄이는게 맞나 ? ) consolidate 전에 해야 할지도
@@ -231,21 +233,29 @@ void FibonacciHeap<T>::consolidate() {
     std::shared_ptr<FibonacciNode<T>> start = min_node;
     std::shared_ptr<FibonacciNode<T>> current = min_node;
 
+    // merge를 할 경우에 current가 안바뀌어서 지금 문제가 발생한다.
     int index;
+    bool is_merged = false;
     do {
+        is_merged = false;
+        std::cout << "-----iter...-----" << std::endl;
+        std::cout << "key : " << current->key << std::endl;
         index = current->degree;
+        std::cout << "degree : " << index << std::endl;
         if (A[index] == nullptr) {
             A[index] = current;
             current = current->right;
         } else {
             if (A[index] != current) {
+                std::cout << "-----call merge-----" << std::endl;
                 merge(A[index], current);
+                is_merged = true;
                 if (current->key > A[index]->key)
                     current = A[index];
                 A[index] = nullptr;
             }
         }
-    } while(start != current);
+    } while(start != current || is_merged);
     
 }
 
@@ -266,8 +276,11 @@ void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_p
             y->right = x->child;
             y->left = x->child->left;
             x->child->left = y;
-        } else
+        } else {
             x->child = y;
+            y->left = y;
+            y->right = y;
+        }
         // y가 min_node였을 경우, min_node를 x로 수정한다.
         if (y == min_node)
             min_node = x;
@@ -283,8 +296,11 @@ void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_p
             x->right = y->child;
             x->left = y->child->left;
             y->child->left = x;
-        } else
+        } else {
             y->child = x;
+            x->left = x;
+            x->right = x;
+        }
 
         if (x == min_node)
             min_node = y;
