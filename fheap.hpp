@@ -207,7 +207,11 @@ void FibonacciHeap<T>::decrease_key(std::shared_ptr<FibonacciNode<T>>& x, T new_
 	// TODO
     x->key = new_key;
     // x가 root node인 경우, return.
-    if ((x->parent).lock() == nullptr) return;
+    if ((x->parent).lock() == nullptr) {
+        // new_key 가 min_node의 key보다 작을 경우, min_node를 x로 update 해준다.
+        if (new_key < min_node->key) min_node = x;
+        return;
+    }
     // decrease_key가 min heap을 violate하지 않은 경우, key만 바꿔주고 return.
     if ((x->parent).lock()->key <= new_key) return;
 

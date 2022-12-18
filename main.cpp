@@ -29,6 +29,15 @@ int main(){
 
     std::cout<<min_value<<std::endl;
 
+    std::shared_ptr<FibonacciNode<int>> test_node = std::make_shared<FibonacciNode<int>>(76);
+    heap.insert(test_node);
+
+    heap.decrease_key(test_node, 33);
+
+    heap.remove(test_node);
+
+
+
 
 
     // // Dijkstra's Algorithm
