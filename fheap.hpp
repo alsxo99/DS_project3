@@ -27,7 +27,8 @@ class FibonacciNode {
 
         // Destructor
 		// You can implement your custom destructor.
-        ~FibonacciNode() = default;
+        // ~FibonacciNode() = default;
+        ~FibonacciNode() { std::cout << "----delete " << key << "----" << std::endl; }
 
         T key;
         size_t degree;
@@ -82,31 +83,15 @@ class FibonacciHeap : public PriorityQueue<T> {
         void merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_ptr<FibonacciNode<T>>& y);
 		void cut(std::shared_ptr<FibonacciNode<T>>& x);
 		void recursive_cut(std::shared_ptr<FibonacciNode<T>>& x);
-
+        void destruct_helper(std::shared_ptr<FibonacciNode<T>>& x);
 };
 
 template <typename T>
 FibonacciHeap<T>::~FibonacciHeap() {
 	// TODO
 	// NOTE: Be aware of memory leak or memory error.
-
-    // std::weak_ptr<FibonacciNode<T>> current;
-    // current = min_node;
-
-    // while (current.lock()->right != nullptr)
-    // {
-    //     std::cout << current.lock()->right->key << std::endl;
-    //     (current.lock()->right).reset();
-    //     current = current.lock()->right;
-    // }
-
-    // 연습용
-    // std::shared_ptr<FibonacciNode<T>> p1 = min_node;
-    // std::shared_ptr<FibonacciNode<T>> p2 = min_node;
-
-    // std::cout << (p1 == p2) << std::endl;
-    // std::cout << (p1.get() == p2.get()) << std::endl;
-    
+    destruct_helper(min_node);
+    min_node = nullptr;
 }
 
 template <typename T>
@@ -163,11 +148,11 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
         std::shared_ptr<FibonacciNode<T>> child = min_node->child;
         min_node->child = nullptr; // 필요 없나?
 
-        // for (int i = 0; i < int(min_node->degree); i++)
-        // {
-        //     child->parent = nullptr;
-        //     child = child->right;
-        // }
+        for (int i = 0; i < int(min_node->degree); i++) // 확인 필요
+        {
+            (child->parent).lock() = nullptr;
+            child = child->right;
+        }
         
         // root list에 min_node 대신 그의 child로 수정해준다.
         (min_node->left).lock()->right = child;
@@ -208,8 +193,8 @@ void FibonacciHeap<T>::decrease_key(std::shared_ptr<FibonacciNode<T>>& x, T new_
     // x가 root node인 경우, return.
     if ((x->parent).lock() == nullptr) return;
     // decrease_key가 min heap을 violate하지 않은 경우, key만 바꿔주고 return.
-    if ((x->parent).lock()->key <= new_key)
-        return;
+    if ((x->parent).lock()->key <= new_key) return;
+
     // violate 한 경우, 
     else cut(x);
 }
@@ -217,7 +202,12 @@ void FibonacciHeap<T>::decrease_key(std::shared_ptr<FibonacciNode<T>>& x, T new_
 template <typename T>
 void FibonacciHeap<T>::remove(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
-	
+    // 현재 min_node의 key보다 낮은 key를 생성한다. *** 확인필요
+	T min_key = min_node->key - 1;
+    // decrease_key로 해당 node를 가장 낮은 key로 만든다.
+    decrease_key(x, min_key);
+    // extract_min을 통해 제거한다.
+    extract_min();
 }
 
 template <typename T>
@@ -312,7 +302,13 @@ void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_p
 template <typename T>
 void FibonacciHeap<T>::cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
-    // x가 parent의 child였을 경우,
+    // decrease_key에서 parent가 없는 경우를 걸렀으므로, x는 반드시 parent가 있다.
+    // x가 parent에 저장된 child가 아닐 경우, x를 childlist에서 연결을 끊고, root list에 추가한다.
+    if ((x->parent).lock()->child != x) {
+
+    }
+
+    // x가 parent의 child였을 경우, 다른 child를 배정해주고, 위와 같은 알고리즘.
     if ((x->parent).lock()->child == x)
         (x->parent).lock()->child = x->child;
 
@@ -326,6 +322,22 @@ template <typename T>
 void FibonacciHeap<T>::recursive_cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
 
+}
+
+template <typename T>
+void FibonacciHeap<T>::destruct_helper(std::shared_ptr<FibonacciNode<T>>& x) {
+    
+    std::shared_ptr<FibonacciNode<T>> start = x;
+    std::shared_ptr<FibonacciNode<T>> current = x;
+
+    do
+    {
+        if (current->degree) 
+            destruct_helper(current->child);
+
+        current = (current->left).lock();
+        current->right = nullptr;
+    } while (start != current);
 }
 
 #endif // __FHEAP_H_
