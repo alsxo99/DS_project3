@@ -140,6 +140,18 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
     std::cout << "-----extract_min-----" << std::endl;
 
     T min_key = min_node->key;
+    bool is_one_root = false;
+
+    // only one node만 있었을 경우,
+    if (size_ == 1) {
+        min_node->right = nullptr;
+        min_node = nullptr;
+        size_--;
+        return min_key;
+    }
+
+    if (min_node->right == min_node)
+        is_one_root = true;
 
     // min_node와 child간의 관계 끊기
     // child가 있는 경우,
@@ -154,11 +166,15 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
             child = child->right;
         }
         
-        // root list에 min_node 대신 그의 child로 수정해준다.
-        (min_node->left).lock()->right = child;
-        (child->left).lock()->right = min_node->right;
-        (min_node->right)->left = child->left;
-        child->left = min_node->left;
+        // root list에 min_node 대신 그의 child로 수정해준다. 지금 min_node가 root list에 유일한 node일 때 문제가 생긴다. 근데 이런 경우가 존재하나??
+        if (is_one_root) {
+            min_node = child;
+        } else {
+            (min_node->left).lock()->right = child;
+            (child->left).lock()->right = min_node->right;
+            (min_node->right)->left = child->left;
+            child->left = min_node->left;
+        }
     // child가 없는 경우, min_node만 root list에서 빼고 올바르게 연결해준다.
     } else {
         (min_node->left).lock()->right = min_node->right;
@@ -196,7 +212,7 @@ void FibonacciHeap<T>::decrease_key(std::shared_ptr<FibonacciNode<T>>& x, T new_
     if ((x->parent).lock()->key <= new_key) return;
 
     // violate 한 경우, 
-    else cut(x);
+    cut(x);
 }
 
 template <typename T>
@@ -302,30 +318,57 @@ void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_p
 template <typename T>
 void FibonacciHeap<T>::cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
+    std::shared_ptr<FibonacciNode<T>> parent_node = (x->parent).lock();
     // decrease_key에서 parent가 없는 경우를 걸렀으므로, x는 반드시 parent가 있다.
-    // x가 parent에 저장된 child가 아닐 경우, x를 childlist에서 연결을 끊고, root list에 추가한다.
-    if ((x->parent).lock()->child != x) {
-
+    // x가 parent에 저장된 child가 아닐 경우, x를 childlist에서 연결을 끊는다.
+    if (parent_node->child != x) {
+        (x->left).lock()->right = x->right;
+        (x->right)->left = x->left;
+    // x가 parent에 저장된 child일 경우, 새로운 child를 등록해줘야한다. 없다면 nullptr을 넣는다.
+    } else {
+        // x가 유일한 child인 경우.
+        if (x->right == x)
+            parent_node->child = nullptr;
+        // x 이외의 child가 있는 경우
+        else {
+            (x->left).lock()->right = x->right;
+            (x->right)->left = x->left;
+            parent_node->child = x->right;
+        }
     }
+    // x를 root list에 추가한다.
+    (min_node->left).lock()->right = x;
+    x->right = min_node;
+    x->left = min_node->left;
+    min_node->left = x;
+    (x->parent).lock() = nullptr;
 
-    // x가 parent의 child였을 경우, 다른 child를 배정해주고, 위와 같은 알고리즘.
-    if ((x->parent).lock()->child == x)
-        (x->parent).lock()->child = x->child;
+    // x가 marked 되어있었다면, unmarked로 바꾼다.
+    if (x->marked)
+        x->marked = false;
+    // x가 min_node의 key보다 작은 경우, min_node를 x로 update 해준다.
+    if (x->key < min_node->key) 
+        min_node = x;
 
-    // x의 child가 존재할 경우, x의 parent와 child간의 관계를 만들어 준다.
-    if (x->degree) {
-        // 기존의 x의 child를 x의 parend의 child
-    }
+    recursive_cut(parent_node);
 }
 
 template <typename T>
 void FibonacciHeap<T>::recursive_cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
-
+    // x가 root list에 있으면 그냥 return.
+    if ((x->parent).lock() == nullptr) return;
+    // x가 root list에 있지 않으면, marked가 false인 경우엔 true로, marked가 true라면 cut를 call한다.
+    if (!(x->marked))
+        x->marked = true;
+    else 
+        cut(x);
 }
 
 template <typename T>
 void FibonacciHeap<T>::destruct_helper(std::shared_ptr<FibonacciNode<T>>& x) {
+
+    if (min_node == nullptr) return;
     
     std::shared_ptr<FibonacciNode<T>> start = x;
     std::shared_ptr<FibonacciNode<T>> current = x;
