@@ -350,6 +350,8 @@ void FibonacciHeap<T>::cut(std::shared_ptr<FibonacciNode<T>>& x) {
     if (x->key < min_node->key) 
         min_node = x;
 
+    parent_node->degree -= 1;
+
     recursive_cut(parent_node);
 }
 
