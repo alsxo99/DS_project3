@@ -27,8 +27,8 @@ class FibonacciNode {
 
         // Destructor
 		// You can implement your custom destructor.
-        // ~FibonacciNode() = default;
-        ~FibonacciNode() { std::cout << "----delete " << key << "----" << std::endl; }
+        ~FibonacciNode() = default;
+        // ~FibonacciNode() { std::cout << "----delete " << key << "----" << std::endl; }
 
         T key;
         size_t degree;
@@ -166,8 +166,9 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
             child = child->right;
         }
         
-        // root list에 min_node 대신 그의 child로 수정해준다. 지금 min_node가 root list에 유일한 node일 때 문제가 생긴다. 근데 이런 경우가 존재하나??
+        // root list에 min_node 대신 그의 child로 수정해준다.
         if (is_one_root) {
+            min_node->right = nullptr;
             min_node = child;
         } else {
             (min_node->left).lock()->right = child;
@@ -276,7 +277,7 @@ void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_p
 	// TODO
     std::cout << "------merge------" << std::endl;
 
-    if (x->key < y->key) {
+    if (x->key <= y->key) {
         // y를 root list에서 제거하고, y의 parent를 x로 해준다. x의 degree는 1 증가.
         (y->left).lock()->right = y->right;
         (y->right)->left = y->left;
