@@ -116,7 +116,7 @@ void FibonacciHeap<T>::insert(std::shared_ptr<FibonacciNode<T>>& node) {
         node->right = node;
         node->left = node;
         min_node = node;
-        std::cout << "initial inserted!, key : " << node->key << std::endl;
+        // std::cout << "initial inserted!, key : " << node->key << std::endl;
     } else {
         (min_node->left).lock()->right = node;
         node->right = min_node;
@@ -126,7 +126,7 @@ void FibonacciHeap<T>::insert(std::shared_ptr<FibonacciNode<T>>& node) {
         if (node->key < min_node->key)
             min_node = node;
         
-        std::cout << "inserted!, key : " << node->key << std::endl;
+        // std::cout << "inserted!, key : " << node->key << std::endl;
         // std::cout << "left : " << (node->left).lock()->key << "    right : " << node->right->key << std::endl;
     }
     size_++;
@@ -137,7 +137,7 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
 	// TODO
     if(is_empty())
         return std::nullopt;
-    std::cout << "-----extract_min-----" << std::endl;
+    // std::cout << "-----extract_min-----" << std::endl;
 
     T min_key = min_node->key;
     bool is_one_root = false;
@@ -195,7 +195,7 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
         current = current->right;
     } while (start != current);
 
-    std::cout << min_node->key << std::endl;
+    // std::cout << min_node->key << std::endl;
 
     consolidate();
 
@@ -206,7 +206,7 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
 template <typename T>
 void FibonacciHeap<T>::decrease_key(std::shared_ptr<FibonacciNode<T>>& x, T new_key) {
 	// TODO
-    std::cout << "-----decrease_key-----" << std::endl;
+    // std::cout << "-----decrease_key-----" << std::endl;
     x->key = new_key;
     // x가 root node인 경우, return.
     if ((x->parent).lock() == nullptr) {
@@ -225,7 +225,7 @@ template <typename T>
 void FibonacciHeap<T>::remove(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
     // 현재 min_node의 key보다 낮은 key를 생성한다. *** 확인필요
-    std::cout << "-----remove-----" << std::endl;
+    // std::cout << "-----remove-----" << std::endl;
 	T min_key = -INFINITY;
     // decrease_key로 해당 node를 가장 낮은 key로 만든다.
     decrease_key(x, min_key);
@@ -239,7 +239,7 @@ void FibonacciHeap<T>::consolidate() {
 	int len = int(log(size_) / log(phi)) + 1;
 	// TODO
 
-    std::cout << "-----consolidate-----" << std::endl;
+    // std::cout << "-----consolidate-----" << std::endl;
 
 	std::vector<std::shared_ptr<FibonacciNode<T>>> A(len, nullptr);
 
@@ -250,16 +250,16 @@ void FibonacciHeap<T>::consolidate() {
     bool is_merged = false;
     do {
         is_merged = false;
-        std::cout << "-----iter...-----" << std::endl;
-        std::cout << "key : " << current->key << std::endl;
+        // std::cout << "-----iter...-----" << std::endl;
+        // std::cout << "key : " << current->key << std::endl;
         index = current->degree;
-        std::cout << "degree : " << index << std::endl;
+        // std::cout << "degree : " << index << std::endl;
         if (A[index] == nullptr) {
             A[index] = current;
             current = current->right;
         } else {
             if (A[index] != current) {
-                std::cout << "-----call merge-----" << std::endl;
+                // std::cout << "-----call merge-----" << std::endl;
                 merge(A[index], current);
                 is_merged = true;
                 if (current->key >= A[index]->key)
@@ -274,7 +274,7 @@ void FibonacciHeap<T>::consolidate() {
 template <typename T>
 void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_ptr<FibonacciNode<T>>& y) {
 	// TODO
-    std::cout << "------merge------" << std::endl;
+    // std::cout << "------merge------" << std::endl;
 
     if (x->key <= y->key) {
         // y를 root list에서 제거하고, y의 parent를 x로 해준다. x의 degree는 1 증가.
@@ -324,7 +324,7 @@ void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_p
 template <typename T>
 void FibonacciHeap<T>::cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
-    std::cout << "-----cut-----" << std::endl;
+    // std::cout << "-----cut-----" << std::endl;
     std::shared_ptr<FibonacciNode<T>> parent_node = (x->parent).lock();
     // decrease_key에서 parent가 없는 경우를 걸렀으므로, x는 반드시 parent가 있다.
     // x가 parent에 저장된 child가 아닐 경우, x를 childlist에서 연결을 끊는다.
@@ -366,7 +366,7 @@ template <typename T>
 void FibonacciHeap<T>::recursive_cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
     // x가 root list에 있으면 그냥 return.
-    std::cout << "-----recursive cut-----" << std::endl;
+    // std::cout << "-----recursive cut-----" << std::endl;
     if ((x->parent).lock() == nullptr) return;
     // x가 root list에 있지 않으면, marked가 false인 경우엔 true로, marked가 true라면 cut를 call한다.
     if (!(x->marked))
