@@ -29,14 +29,47 @@ int main(){
 
     std::cout<<min_value<<std::endl;
 
-    std::shared_ptr<FibonacciNode<int>> test_node = std::make_shared<FibonacciNode<int>>(76);
-    heap.insert(test_node);
+    // std::shared_ptr<FibonacciNode<int>> test_node1 = std::make_shared<FibonacciNode<int>>(15);
+    // std::shared_ptr<FibonacciNode<int>> test_node2 = std::make_shared<FibonacciNode<int>>(8);
+    // std::shared_ptr<FibonacciNode<int>> test_node3 = std::make_shared<FibonacciNode<int>>(5);
+    // std::shared_ptr<FibonacciNode<int>> test_node4 = std::make_shared<FibonacciNode<int>>(9);
+    // std::shared_ptr<FibonacciNode<int>> test_node5 = std::make_shared<FibonacciNode<int>>(10);
+    // std::shared_ptr<FibonacciNode<int>> test_node6 = std::make_shared<FibonacciNode<int>>(1);
+    // std::shared_ptr<FibonacciNode<int>> test_node7 = std::make_shared<FibonacciNode<int>>(28);
+    // std::shared_ptr<FibonacciNode<int>> test_node8 = std::make_shared<FibonacciNode<int>>(29);
 
-    heap.decrease_key(test_node, 33);
+    
 
-    heap.remove(test_node);
+    // heap.insert(test_node7);
+    // heap.insert(test_node2);
+    // heap.insert(test_node3);
+    // heap.insert(test_node4);
+    // heap.extract_min();
 
+    // heap.remove(test_node7);
+    // heap.insert(test_node8);
+    // heap.merge(test_node4, test_node8);
+    // heap.remove(test_node8);
 
+    // heap.insert(test_node1);
+    // heap.merge(test_node1, test_node2);
+
+    // heap.insert(test_node6);
+    // heap.insert(test_node5);
+    // heap.merge(test_node5, test_node6);
+    // heap.merge(test_node6, test_node3);
+    
+    // heap.decrease_key(test_node4, 4);
+    // heap.decrease_key(test_node1, 7);
+    // std::cout << test_node6->degree << std::endl;
+    // std::cout << ((test_node1->parent).lock() == nullptr ) << std::endl;
+    // std::cout << ((test_node2->parent).lock() == nullptr ) << std::endl;
+    // std::cout << ((test_node3->parent).lock() == nullptr ) << std::endl;
+    // std::cout << ((test_node4->parent).lock() == nullptr ) << std::endl;
+
+    // std::cout << (test_node2->child == nullptr ) << std::endl;
+    // std::cout << (test_node3->child == nullptr ) << std::endl;
+    // std::cout << (test_node4->child == nullptr ) << std::endl;
 
 
 

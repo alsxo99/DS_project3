@@ -162,7 +162,7 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
 
         for (int i = 0; i < int(min_node->degree); i++) // 확인 필요
         {
-            (child->parent).lock() = nullptr;
+            (child->parent).reset();
             child = child->right;
         }
         
@@ -205,6 +205,7 @@ std::optional<T> FibonacciHeap<T>::extract_min() {
 template <typename T>
 void FibonacciHeap<T>::decrease_key(std::shared_ptr<FibonacciNode<T>>& x, T new_key) {
 	// TODO
+    std::cout << "-----decrease_key-----" << std::endl;
     x->key = new_key;
     // x가 root node인 경우, return.
     if ((x->parent).lock() == nullptr) {
@@ -223,7 +224,8 @@ template <typename T>
 void FibonacciHeap<T>::remove(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
     // 현재 min_node의 key보다 낮은 key를 생성한다. *** 확인필요
-	T min_key = min_node->key - 1;
+    std::cout << "-----remove-----" << std::endl;
+	T min_key = -INFINITY;
     // decrease_key로 해당 node를 가장 낮은 key로 만든다.
     decrease_key(x, min_key);
     // extract_min을 통해 제거한다.
@@ -322,6 +324,7 @@ void FibonacciHeap<T>::merge(std::shared_ptr<FibonacciNode<T>>& x, std::shared_p
 template <typename T>
 void FibonacciHeap<T>::cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
+    std::cout << "-----cut-----" << std::endl;
     std::shared_ptr<FibonacciNode<T>> parent_node = (x->parent).lock();
     // decrease_key에서 parent가 없는 경우를 걸렀으므로, x는 반드시 parent가 있다.
     // x가 parent에 저장된 child가 아닐 경우, x를 childlist에서 연결을 끊는다.
@@ -345,7 +348,7 @@ void FibonacciHeap<T>::cut(std::shared_ptr<FibonacciNode<T>>& x) {
     x->right = min_node;
     x->left = min_node->left;
     min_node->left = x;
-    (x->parent).lock() = nullptr;
+    (x->parent).reset();
 
     // x가 marked 되어있었다면, unmarked로 바꾼다.
     if (x->marked)
@@ -363,6 +366,7 @@ template <typename T>
 void FibonacciHeap<T>::recursive_cut(std::shared_ptr<FibonacciNode<T>>& x) {
 	// TODO
     // x가 root list에 있으면 그냥 return.
+    std::cout << "-----recursive cut-----" << std::endl;
     if ((x->parent).lock() == nullptr) return;
     // x가 root list에 있지 않으면, marked가 false인 경우엔 true로, marked가 true라면 cut를 call한다.
     if (!(x->marked))
