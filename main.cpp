@@ -12,22 +12,22 @@ int main(){
 
     // Fibonacci Heap
 
-    // FibonacciHeap<int> heap(3);
-    // std::cout<<(heap.get_min()==std::nullopt)<<std::endl;
+    FibonacciHeap<int> heap(3);
+    std::cout<<(heap.get_min()==std::nullopt)<<std::endl;
 
-    // std::vector<int> inserted;
+    std::vector<int> inserted;
 
-    // for(int i = 0 ; i < 10 ; ++i) {
-    //     int temp = rand() % 100;
-    //     heap.insert(temp);
-    //     inserted.push_back(temp);
-    // }
+    for(int i = 0 ; i < 10 ; ++i) {
+        int temp = rand() % 100;
+        heap.insert(temp);
+        inserted.push_back(temp);
+    }
 
-    // std::cout<<heap.get_min().value()<<std::endl;
+    std::cout<<heap.get_min().value()<<std::endl;
 
-    // int min_value = heap.extract_min().value();
+    int min_value = heap.extract_min().value();
 
-    // std::cout<<min_value<<std::endl;
+    std::cout<<min_value<<std::endl;
 
     // std::shared_ptr<FibonacciNode<int>> test_node1 = std::make_shared<FibonacciNode<int>>(15);
     // std::shared_ptr<FibonacciNode<int>> test_node2 = std::make_shared<FibonacciNode<int>>(8);
@@ -97,11 +97,9 @@ int main(){
     // The printed result should be same as above.
 
     for(size_t i = 0 ; i < 5; ++i) {
-        if (i != 2) {
-            std::cout<<"[vertex i] ";
-            std::cout<<"previous: "<<std::get<0>(result[i].value())<<", ";
-            std::cout<<"distance: "<<std::get<1>(result[i].value())<<std::endl;
-        }
+        std::cout<< "[vertex " << i << "] ";
+        std::cout<<"previous: "<<std::get<0>(result[i].value())<<", ";
+        std::cout<<"distance: "<<std::get<1>(result[i].value())<<std::endl;
     }
 
     return 0;

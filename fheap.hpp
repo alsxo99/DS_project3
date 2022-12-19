@@ -246,7 +246,6 @@ void FibonacciHeap<T>::consolidate() {
     std::shared_ptr<FibonacciNode<T>> start = min_node;
     std::shared_ptr<FibonacciNode<T>> current = min_node;
 
-    // merge를 할 경우에 current가 안바뀌어서 지금 문제가 발생한다.
     int index;
     bool is_merged = false;
     do {
@@ -263,7 +262,7 @@ void FibonacciHeap<T>::consolidate() {
                 std::cout << "-----call merge-----" << std::endl;
                 merge(A[index], current);
                 is_merged = true;
-                if (current->key > A[index]->key)
+                if (current->key >= A[index]->key)
                     current = A[index];
                 A[index] = nullptr;
             }

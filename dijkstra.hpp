@@ -72,6 +72,7 @@ dijkstra_shortest_path(Graph& g, vertex_t src) {
 	std::vector<std::shared_ptr<FibonacciNode<float>>> nodes(g.get_num_vertices(), nullptr);
 
     // TODO
+	// previous[src] = src;
 	dist[src] = 0;
 	nodes[src] = std::make_shared<FibonacciNode<float>>(dist[src]);
     FibonacciHeap<float> heap = {};
@@ -79,31 +80,39 @@ dijkstra_shortest_path(Graph& g, vertex_t src) {
 	for (vertex_t v = 0; v < g.get_num_vertices(); v++)
 	{
 		if (v != src) {
-			dist[v] = INFINITY;
 			nodes[v] = std::make_shared<FibonacciNode<float>>(dist[v]);
 		}
 		heap.insert(nodes[v]);
 	}
 
+	vertex_t dest = 0;
+	edge_weight_t edge_weight = 0;
+
 	while (!heap.is_empty())
 	{
 		float min_key = heap.extract_min().value();
 		// 이 min_key를 가지고 있는 u를 dist에서 찾아야 한다.
-		size_t u;
+		size_t u = std::find(dist.begin(), dist.end(), min_key) - dist.begin();
 		std::vector<edge_t> adjacency_list = g.adj_list(u);
-		for (vertex_t v = 0; v < g.get_num_vertices(); v++)
+		for (vertex_t v = 0; v < adjacency_list.size(); v++)
 		{
-			if (dist[u] + (adjacency_list[v])[2] < dist[v])
+			dest = std::get<1>(adjacency_list[v]);
+			edge_weight = std::get<2>(adjacency_list[v]);
+
+			if (dist[u] + edge_weight < dist[dest])
 			{
-				dist[v] = dist[u] + (adjacency_list[v])[2];
-				previous[v] = u;
-				heap.decrease_key(nodes[v], dist[v]);
+				dist[dest] = dist[u] + edge_weight;
+				previous[dest] = u;
+				heap.decrease_key(nodes[dest], dist[dest]);
 			}
-			
 		}
-		
-		
 	}
+
+	for (vertex_t v = 0; v < g.get_num_vertices(); v++)
+	{
+		M[v] = std::make_tuple(previous[v], dist[v]);
+	}
+	
 
 	return M;
 }
