@@ -90,9 +90,16 @@ dijkstra_shortest_path(Graph& g, vertex_t src) {
 
 	while (!heap.is_empty())
 	{
+		// get_min_node로 받은 min_node의 pointer와 같은 node를 가리키는 node u 를 nodes에서 찾는다.
+		size_t u;
+		FibonacciNode<float>* min_node = heap.get_min_node();
+		for (vertex_t i = 0; i < nodes.size(); i++)
+		{
+			if (nodes[i].get() == min_node)
+				u = i;
+		}
 		float min_key = heap.extract_min().value();
-		// 이 min_key를 가지고 있는 u를 dist에서 찾아야 한다.
-		size_t u = std::find(dist.begin(), dist.end(), min_key) - dist.begin();
+		// size_t u = std::find(dist.begin(), dist.end(), min_key) - dist.begin();
 		std::vector<edge_t> adjacency_list = g.adj_list(u);
 		for (vertex_t v = 0; v < adjacency_list.size(); v++)
 		{
@@ -110,7 +117,8 @@ dijkstra_shortest_path(Graph& g, vertex_t src) {
 
 	for (vertex_t v = 0; v < g.get_num_vertices(); v++)
 	{
-		M[v] = std::make_tuple(previous[v], dist[v]);
+		if (dist[v] != 1e10)
+			M[v] = std::make_tuple(previous[v], dist[v]);
 	}
 	
 

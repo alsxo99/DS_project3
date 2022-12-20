@@ -90,7 +90,7 @@ int main(){
             = dijkstra_shortest_path(g1, 2);
 
     // Previous vertex of src are not checked.
-    std::vector<vertex_t> previous = {2, 0, (vertex_t)-1, 2, 1}; 
+    std::vector<vertex_t> previous = {2, 0, (vertex_t)-1, 2, 1};
     std::vector<edge_weight_t> dist = {1.0f, 4.0f, 0.0f, 2.0f, 5.0f};
 
 
