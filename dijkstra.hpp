@@ -95,8 +95,10 @@ dijkstra_shortest_path(Graph& g, vertex_t src) {
 		FibonacciNode<float>* min_node = heap.get_min_node();
 		for (vertex_t i = 0; i < nodes.size(); i++)
 		{
-			if (nodes[i].get() == min_node)
+			if (nodes[i].get() == min_node) {
 				u = i;
+				break;
+			}
 		}
 		float min_key = heap.extract_min().value();
 		// size_t u = std::find(dist.begin(), dist.end(), min_key) - dist.begin();
